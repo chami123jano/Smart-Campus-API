@@ -37,6 +37,10 @@ public class SensorResource {
 
         if (sensor.getId() == null || sensor.getId().isEmpty()) {
             sensor.setId(UUID.randomUUID().toString());
+        } else if (InMemoryDatabase.sensors.containsKey(sensor.getId())) {
+            return Response.status(Response.Status.CONFLICT)
+                           .entity(Map.of("error", "Sensor ID '" + sensor.getId() + "' already exists. Cannot create duplicate."))
+                           .build();
         }
 
         InMemoryDatabase.sensors.put(sensor.getId(), sensor);
@@ -63,4 +67,45 @@ public class SensorResource {
     @Path("/{sensorId}/readings")
     public SensorReadingResource getSensorReadingResource(@PathParam("sensorId") String sensorId) {
         return new SensorReadingResource(sensorId);
-    }}
+    }
+
+    @PUT
+    @Path("/{sensorId}")
+    public Response updateSensor(@PathParam("sensorId") String sensorId, Sensor updatedSensor) {
+        Sensor existingSensor = InMemoryDatabase.sensors.get(sensorId);
+        
+        if (updatedSensor == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity(Map.of("error", "The request payload cannot be empty."))
+                           .build();
+        }
+
+        if (updatedSensor.getId() != null && !sensorId.equals(updatedSensor.getId())) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity(Map.of("error", "Sensor ID cannot be changed via PUT request. It must match the URL path ID."))
+                           .build();
+        }
+
+        if (existingSensor == null) {
+             return Response.status(Response.Status.NOT_FOUND).entity(Map.of("error", "Sensor not found")).build();
+        }
+        
+        updatedSensor.setId(sensorId);
+        updatedSensor.setCurrentValue(existingSensor.getCurrentValue()); // Preserve reading
+        InMemoryDatabase.sensors.put(sensorId, updatedSensor);
+        
+        return Response.ok(updatedSensor).build();
+    }
+
+    @DELETE
+    @Path("/{sensorId}")
+    public Response deleteSensor(@PathParam("sensorId") String sensorId) {
+        if (!InMemoryDatabase.sensors.containsKey(sensorId)) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity(Map.of("error", "Sensor not found."))
+                           .build();
+        }
+        InMemoryDatabase.sensors.remove(sensorId);
+        return Response.noContent().build();
+    }
+}

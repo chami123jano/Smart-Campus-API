@@ -30,6 +30,10 @@ public class RoomResource {
         }
         if (room.getId() == null || room.getId().isEmpty()) {
             room.setId(UUID.randomUUID().toString());
+        } else if (InMemoryDatabase.rooms.containsKey(room.getId())) {
+            return Response.status(Response.Status.CONFLICT)
+                           .entity(Map.of("error", "Room ID '" + room.getId() + "' already exists."))
+                           .build();
         }
         InMemoryDatabase.rooms.put(room.getId(), room);
         return Response.status(Response.Status.CREATED).entity(room).build();
