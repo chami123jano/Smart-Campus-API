@@ -7,6 +7,7 @@
     <groupId>com.smartcampus</groupId>
     <artifactId>smartcampus-api</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <jersey.version>3.1.3</jersey.version>
@@ -26,9 +27,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Jakarta EE Web Profile (Tomcat specific) -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-grizzly2-http</artifactId>
+            <artifactId>jersey-container-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
@@ -49,6 +51,35 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
+                </configuration>
+            </plugin>
+            
+            <!-- WAR Plugin (Tells Maven we are building a Web Application, not a jar) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <!-- Stop complaining about a missing legacy web.xml file -->
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+
+            <!-- Cargo Plugin to simulate Tomcat locally just by running 'mvn cargo:run' -->
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven3-plugin</artifactId>
+                <version>1.10.13</version>
+                <configuration>
+                    <container>
+                        <containerId>tomcat10x</containerId>
+                        <type>embedded</type>
+                    </container>
+                    <configuration>
+                        <properties>
+                            <cargo.servlet.port>8080</cargo.servlet.port>
+                        </properties>
+                    </configuration>
                 </configuration>
             </plugin>
         </plugins>
