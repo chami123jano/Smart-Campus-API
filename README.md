@@ -1,6 +1,8 @@
 # Smart Campus Sensor & Room Management API
 **Module:** 5COSC022W Client-Server Architectures  
-**Student:** [Your Name]  
+**Student:** C. J. Ambawatta  
+**IIT ID:** 20240170
+**UOW ID:** w2153375
 
 ## Overview
 This is a high-performance RESTful web service built with JAX-RS (Jakarta RESTful Web Services) to manage a university's Smart Campus infrastructure. The API handles the management of Rooms and diverse Sensors deployed across the campus, providing a robust interface for facilities managers and automated building systems.
